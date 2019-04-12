@@ -1,11 +1,14 @@
 import json
-import boto3
-
 import random
 import datetime
-from kafka import KafkaProducer
+import logging
 
-producer = KafkaProducer(bootstrap_servers='10.10.0.68:9092,10.10.2.138:9092,10.10.3.137:9092')
+
+from kafka import KafkaProducer
+logging.basicConfig(level=logging.INFO)
+
+
+producer = KafkaProducer(bootstrap_servers="b-2.da70lchko2b25vtopj9u6nh61.c1.kafka.us-east-1.amazonaws.com:9092,b-1.da70lchko2b25vtopj9u6nh61.c1.kafka.us-east-1.amazonaws.com:9092,b-3.da70lchko2b25vtopj9u6nh61.c1.kafka.us-east-1.amazonaws.com:9092",key_serializer=str.encode,acks='all')
 
 def getReferrer():
     data = {}
@@ -19,5 +22,9 @@ def getReferrer():
 
 while True:
         data = json.dumps(getReferrer())
-        print(data)
-        producer.send('demo',data)
+        logging.info("Received Sample Data")
+        try:
+            response = producer.send('demo',key='keyused',value=data)
+            logging.info("Sending Records to Kafka Topic demo")
+        except Exception as e:
+            logging.error("Exception occurred", exc_info=True)

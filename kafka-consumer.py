@@ -1,35 +1,16 @@
 from kafka import KafkaConsumer,KafkaProducer
 import json
-from  elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk, streaming_bulk
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
-es = Elasticsearch()
+consumer = KafkaConsumer(bootstrap_servers="b-2.da70lchko2b25vtopj9u6nh61.c1.kafka.us-east-1.amazonaws.com:9092,b-3.da70lchko2b25vtopj9u6nh61.c1.kafka.us-east-1.amazonaws.com:9092,b-1.da70lchko2b25vtopj9u6nh61.c1.kafka.us-east-1.amazonaws.com:9092",auto_offset_reset='earliest',enable_auto_commit=True,value_deserializer=lambda m: json.loads(m.decode('utf-8')))
 
-host = 'search-event-ra2qdnq2ogub6pxtxxnjpa5sue.us-east-1.es.amazonaws.com'
-es = Elasticsearch(
-    hosts=[{'host': host, 'port': 80}],
-)
-print(es.info())
+#subscribing the tooic
 
-#producer = KafkaProducer(bootstrap_servers='10.10.0.68:9092,10.10.2.138:9092,10.10.3.137:9092')
-consumer = KafkaConsumer(bootstrap_servers='10.10.0.68:9092,10.10.2.138:9092,10.10.3.137:9092',auto_offset_reset='earliest',value_deserializer=lambda m: json.loads(m.decode('utf-8')))
 consumer.subscribe(['demo'])
-docs = []
-count = 0
+
 for msg in consumer:
-    data = msg[6]
-    i = 1
-    res = es.index(index="shareprice",doc_type='price',id=i,body=data)
-    i = i + 1
-
-
-
-
-
-
-
-    #if(msg[6]['TICKER'] == 'AMZN'):
-    #    print("putting into AMNZ topic",msg[6])
-    #    producer.send('AMNZ',json.dumps(msg[6]))
-
+	if(msg[6]["PRICE"] >= 60):
+		print("Consumed Records from demo",msg[6])
